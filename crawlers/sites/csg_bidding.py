@@ -315,9 +315,25 @@ def persist(records: List[Dict[str, Any]], output: Optional[str]) -> None:
     if output.lower().endswith(".csv"):
         df = pd.DataFrame(records)
         if not df.empty:
+            # 逻辑新增：计算“项目单位”
+            def get_project_unit(row):
+                p_name = str(row.get("project_name", ""))
+                if "数据平台与安全" in p_name:
+                    return "数据安全公司"
+                if "数字运营" in p_name:
+                    return "数字运营公司"
+                if "广东电科院" in p_name:
+                    return "广东电科院"
+                if "综合能源" in p_name:
+                    return "综合能源公司"
+                return ""
+
+            df["project_unit"] = df.apply(get_project_unit, axis=1)
+
             # 定义输出列名映射
             col_mapping = {
                 "tenderee": "招标人",
+                "project_unit": "项目单位",
                 "project_name": "项目名称",
                 "project_code": "项目编号",
                 "procurement_method": "采购方式",
