@@ -147,73 +147,100 @@ BidInsight 是一套面向多源公共门户的招标/采购信息采集、标�
 
 ---
 
-## 目录结构（建议）
-
-```
-bidinsight/
-├─ apps/
-│  ├─ web/                # 前端（React）
-│  └─ api/                # 后端（FastAPI）
-├─ crawlers/              # 爬虫与站点适配
-│  ├─ sites/              # 站点规则与解析器
-│  ├─ pipelines/          # 清洗/去重/入库
-│  └─ scheduler/          # 调度与编排
-├─ configs/               # 全局配置与站点 YAML/JSON
-├─ db/
-│  ├─ migrations/         # 数据库迁移
-│  └─ seeds/              # 初始化数据
-├─ scripts/               # 运维脚本（备份、重建索引）
-├─ docs/                  # 文档与接口规范
-└─ docker/                # Docker 与 compose
-```
-
----
-
 ## 快速开始
 
 1) 环境依赖
 - Python 3.10+
-- Node.js 18+
-- PostgreSQL 13+（或 MySQL 8）
-- Redis（可选）
-- Docker（可选）
+- Node.js 18+ (可选，用于前端)
+- PostgreSQL 13+ (可选，用于后续存储)
 
-2) 克隆仓库
-```
+2) 克隆仓库 & 安装依赖
+```bash
 git clone https://github.com/<your-org>/bidinsight.git
 cd bidinsight
-```
 
-3) 后端（API）
-```
-cd apps/api
-python -m venv .venv && source .venv/bin/activate
+# 创建并激活虚拟环境
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 安装项目依赖
 pip install -r requirements.txt
-# 配置 .env（参考 .env.example）
-alembic upgrade head
-uvicorn main:app --reload
 ```
 
-4) 前端（Web）
+3) 运行爬虫（实战）
+
+**场景 A：南方电网供应链（批量采集）**
+读取 `configs/keywords/csg_units.txt` 中的单位列表，抓取近 7 天的招标/非招标公告，并生成 CSV 报表：
+```bash
+python crawlers/sites/csg_bidding.py \
+  --keywords-file configs/keywords/csg_units.txt \
+  --since 2024-11-15 \
+  --max-pages 5 \
+  --with-detail
 ```
-cd apps/web
-pnpm i
-pnpm dev
+> 结果自动保存在 `data_csv/` 目录下，文件名为 `YYYYMMDD_HHMMSS.csv`。
+
+**场景 B：南方电网供应链（单点验证）**
+```bash
+python crawlers/sites/csg_bidding.py \
+  --keyword "南方电网数字电网集团有限公司" \
+  --with-detail
 ```
 
-5) 爬虫与调度
-```
-cd crawlers
-pip install -r requirements.txt
-# 启动开发环境调度
-python -m scheduler.run
-# 调试单站点
-python -m sites.sample_portal detail --since "2024-01-01"
+**场景 C：国网新一代电子商务平台**
+```bash
+python crawlers/sites/sgcc_supply.py \
+  --max-pages 1 \
+  --with-detail \
+  --standardize \
+  --output exports/sgcc_sample.jsonl
 ```
 
-6) Docker（可选）
+4) 前端与后端（开发中）
+*详见 `apps/` 目录下的说明*
+
+---
+
+## 当前功能 (v0.1)
+
+### 1. 南方电网供应链爬虫 (`csg_bidding.py`)
+- **数据源**: [bidding.csg.cn](https://www.bidding.csg.cn)
+- **核心特性**:
+  - **批量采集**: 支持从文件读取多个关键词循环采集。
+  - **智能解析**: 自动识别“招标公告”与“非招标公告”，提取项目编号、招标人、预算、关键时间节点。
+  - **数据清洗**: 自动去除“中标公示”等冗余数据，统一日期格式为 `YYYY-MM-DD`。
+  - **抗干扰**: 内置指数退避重试机制与随机延迟，模拟真实浏览器行为。
+  - **CSV 导出**: 自动生成业务所需的 8 列标准报表（招标人、项目名称、项目编号、采购方式等）。
+
+### 2. 国网电子商务平台爬虫 (`sgcc_supply.py`)
+- **数据源**: [ecsg.com.cn](https://ecsg.com.cn)
+- **核心特性**:
+  - 基于 JSON API 的高效采集。
+  - 支持详情页正文与附件元数据提取。
+  - 标准化 JSONL 输出。
+
+---
+
+## 目录结构
+
 ```
-docker compose up -d
+bidinsight/
+├─ apps/                  # (预留) 前后端应用
+├─ configs/               # 配置文件
+│  └─ keywords/           # 关键词列表
+│     └─ csg_units.txt    # 南网重点单位清单
+├─ crawlers/              # 爬虫核心代码
+│  └─ sites/
+│     ├─ csg_bidding.py   # [核心] 南网爬虫
+│     └─ sgcc_supply.py   # [核心] 国网爬虫
+├─ data_csv/              # [自动生成] CSV 结果输出目录
+├─ exports/               # [自动生成] JSONL/调试数据输出目录
+├─ docs/                  # 文档
+├─ notes/                 # 开发日志
+│  └─ stage1.md           # 阶段 1 详细操作指南
+├─ .gitignore
+├─ requirements.txt
+└─ README.md
 ```
 
 ---
