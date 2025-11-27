@@ -109,9 +109,27 @@ def analyze_projects(
             analysis = analyzer.analyze_from_html(html_content)
             
             if analysis:
+                # 构建分包内容和预算（分段展示）
+                package_contents = []
+                package_budgets = []
+                for pkg in analysis.packages:
+                    # 分包内容：分包名称 + 建设内容
+                    content_text = f"{pkg.package_name}: {pkg.construction_content}"
+                    package_contents.append(content_text)
+                    
+                    # 分包预算
+                    budget_text = f"{pkg.package_name}: {pkg.amount_wan_yuan if pkg.amount_wan_yuan else '未提及'}万元"
+                    package_budgets.append(budget_text)
+                
+                # 用换行符分段
+                project_content = "\n".join(package_contents)
+                project_budget = "\n".join(package_budgets)
+                
                 # 合并原记录和分析结果
                 result = {
                     **record,
+                    "项目内容": project_content,
+                    "项目预算": project_budget,
                     "整体建设内容": analysis.overall_construction_content,
                     "整体金额(万元)": analysis.overall_amount_wan_yuan or "",
                     "是否有分包": "是" if analysis.has_multiple_packages else "否",
@@ -128,6 +146,8 @@ def analyze_projects(
                 console.print(f"[yellow]⊘[/yellow] [{i+1}/{len(records)}] {project_name[:40]} - 无法提取相关内容")
                 results.append({
                     **record,
+                    "项目内容": "",
+                    "项目预算": "",
                     "整体建设内容": "",
                     "整体金额(万元)": "",
                     "是否有分包": "",
@@ -140,6 +160,8 @@ def analyze_projects(
             console.print(f"[red]✗[/red] [{i+1}/{len(records)}] {project_name[:40]} - {e}")
             results.append({
                 **record,
+                "项目内容": "",
+                "项目预算": "",
                 "整体建设内容": f"分析失败: {str(e)}",
                 "整体金额(万元)": "",
                 "是否有分包": "",
@@ -152,9 +174,11 @@ def analyze_projects(
     if results:
         console.print(f"\n[cyan]正在保存结果到 {output_path}...[/cyan]")
         
-        # 确定输出列顺序
+        # 确定输出列顺序（在项目编号后增加"项目内容"和"项目预算"）
         fieldnames = [
-            "招标人", "项目单位", "项目名称", "项目编号", "采购方式",
+            "招标人", "项目单位", "项目名称", "项目编号", 
+            "项目内容", "项目预算",  # 新增两列
+            "采购方式",
             "整体建设内容", "整体金额(万元)", "是否有分包", "分包数量",
             "招标文件获取时间", "招标文件截止时间", "开标时间",
             "招标公告网址", "分包详情"
