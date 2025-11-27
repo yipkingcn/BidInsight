@@ -198,21 +198,27 @@ python crawlers/sites/sgcc_supply.py \
 
 4) AI 智能分析（新功能）✨
 
-**前置条件：配置 OpenAI API**
+**前置条件：配置 Kimi API（推荐）**
 ```bash
-# 复制配置模板
+# 1. 获取 API Key
+# 访问 https://platform.moonshot.cn/console/api-keys
+
+# 2. 复制配置模板
 cp env.example .env
 
-# 编辑 .env 文件，填入你的 API Key
-# OPENAI_API_KEY=sk-xxx
-# OPENAI_BASE_URL=https://api.openai.com/v1  # 可选
+# 3. 编辑 .env 文件，填入你的 API Key
+# OPENAI_API_KEY=sk-your-kimi-key
+# OPENAI_BASE_URL=https://api.moonshot.cn/v1
 ```
+
+> 💡 **为什么选择 Kimi？** 国内访问稳定快速，价格优惠，中文理解优秀。详见 [Kimi 配置指南](docs/KIMI_SETUP.md)
 
 **场景 D：批量分析项目内容**
 对已采集的 CSV 文件进行 AI 分析，提取建设内容和金额：
 ```bash
 # 设置环境变量（或在 .env 中配置）
-export OPENAI_API_KEY="your-api-key"
+export OPENAI_API_KEY="sk-your-kimi-key"
+export OPENAI_BASE_URL="https://api.moonshot.cn/v1"
 
 # 分析所有项目
 python analyze_projects.py data_csv/20251126_215926.csv

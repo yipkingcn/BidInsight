@@ -1,6 +1,6 @@
 """
 项目内容分析器
-使用 LangChain 和 OpenAI GPT 模型分析招标项目详情
+使用 LangChain 和大模型（支持 OpenAI、Kimi 等）分析招标项目详情
 提取项目建设内容、金额信息和分包详情
 """
 
@@ -48,20 +48,24 @@ class ProjectAnalyzer:
         self, 
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
-        model: str = "gpt-4o-mini",
+        model: str = "moonshot-v1-8k",
         temperature: float = 0.0
     ):
         """
         初始化分析器
         
         Args:
-            api_key: OpenAI API Key, 如果不提供则从环境变量 OPENAI_API_KEY 读取
-            base_url: OpenAI API Base URL, 如果不提供则从环境变量 OPENAI_BASE_URL 读取
-            model: 使用的模型名称, 默认 gpt-4o-mini
+            api_key: API Key, 如果不提供则从环境变量 OPENAI_API_KEY 读取
+            base_url: API Base URL, 如果不提供则从环境变量 OPENAI_BASE_URL 读取
+                     - Kimi: https://api.moonshot.cn/v1
+                     - OpenAI: https://api.openai.com/v1
+            model: 使用的模型名称
+                   - Kimi: moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k (默认)
+                   - OpenAI: gpt-4o-mini, gpt-4o, gpt-4-turbo
             temperature: 温度参数, 默认 0.0 (更确定性的输出)
         """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
-        self.base_url = base_url or os.getenv("OPENAI_BASE_URL")
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL", "https://api.moonshot.cn/v1")
         self.model = model
         self.temperature = temperature
         
@@ -201,15 +205,15 @@ class ProjectAnalyzer:
 def create_analyzer(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
-    model: str = "gpt-4o-mini"
+    model: str = "moonshot-v1-8k"
 ) -> ProjectAnalyzer:
     """
     创建分析器的便捷函数
     
     Args:
-        api_key: OpenAI API Key
-        base_url: OpenAI API Base URL
-        model: 模型名称
+        api_key: API Key
+        base_url: API Base URL (Kimi 默认: https://api.moonshot.cn/v1)
+        model: 模型名称 (默认: moonshot-v1-8k)
         
     Returns:
         ProjectAnalyzer 实例

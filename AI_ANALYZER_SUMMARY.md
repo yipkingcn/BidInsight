@@ -17,8 +17,11 @@
 # 激活虚拟环境
 source .venv/bin/activate
 
-# 设置 API Key
-export OPENAI_API_KEY="sk-your-key"
+# 设置 Kimi API Key（推荐）
+export OPENAI_API_KEY="sk-your-kimi-key"
+export OPENAI_BASE_URL="https://api.moonshot.cn/v1"
+
+# 获取 API Key: https://platform.moonshot.cn/console/api-keys
 ```
 
 ### 2. 采集数据
@@ -67,15 +70,16 @@ python analyze_projects.py data_csv/20251126_215926.csv
 | 组件 | 技术栈 | 说明 |
 |------|--------|------|
 | **分析器** | LangChain + Pydantic | 结构化提示词和输出 |
-| **LLM** | OpenAI GPT-4o-mini | 高性价比，速度快 |
+| **LLM** | Kimi moonshot-v1-8k | 国内访问快，中文优秀 |
 | **金额归一化** | 提示词工程 | AI 自动转换为万元 |
 | **批量处理** | Python + httpx | 并发请求和容错处理 |
 
 ## 📈 性能指标
 
 - **速度**: 单个项目 2-5秒
-- **成本**: 100个项目约 $0.05（5美分）
+- **成本**: 100个项目约 ¥2.40（使用 Kimi moonshot-v1-8k）
 - **准确率**: 金额提取 >95%，内容概括 >90%*
+- **国内访问**: 无需翻墙，稳定快速
 
 *基于内部测试数据
 
@@ -140,7 +144,12 @@ python analyze_projects.py data_2.csv -o result_2.csv
 
 ### 问题1: "必须提供 api_key..."
 
-**解决**: 设置环境变量 `export OPENAI_API_KEY="sk-xxx"`
+**解决**: 
+```bash
+export OPENAI_API_KEY="sk-your-kimi-key"
+export OPENAI_BASE_URL="https://api.moonshot.cn/v1"
+```
+获取 API Key: https://platform.moonshot.cn/console/api-keys
 
 ### 问题2: 某些项目分析失败
 

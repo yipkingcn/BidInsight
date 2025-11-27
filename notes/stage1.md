@@ -164,16 +164,30 @@ source .venv/bin/activate
 
 ### 技术要点
 - **金额归一化**: 自动识别并转换"元"、"千元"、"万元"、"亿元"为统一的万元单位
-- **智能提取**: 使用 GPT-4o-mini，采用 temperature=0.0 确保输出稳定
+- **智能提取**: 默认使用 Kimi moonshot-v1-8k，采用 temperature=0.0 确保输出稳定
 - **分包识别**: 可识别"第一包"、"标包1"、"包1"等多种分包表述
 - **容错处理**: 对无法提取或分析失败的项目标注错误信息，不中断整体流程
 
 ### 配置说明
-复制 `env.example` 为 `.env` 并填写你的 OpenAI API Key：
+
+**默认使用 Kimi（月之暗面）大模型**
+
+1. 获取 API Key：访问 https://platform.moonshot.cn/console/api-keys
+2. 复制 `env.example` 为 `.env` 并填写：
+
 ```bash
 cp env.example .env
-# 编辑 .env 文件，填入你的 OPENAI_API_KEY
+# 编辑 .env 文件，填入：
+# OPENAI_API_KEY=sk-your-kimi-key
+# OPENAI_BASE_URL=https://api.moonshot.cn/v1
 ```
+
+**优势**：
+- 🇨🇳 国内访问无需翻墙，速度快
+- 💰 价格优惠（约 ¥12/百万tokens）
+- 🎯 中文理解优秀
+
+详细配置见：`docs/KIMI_SETUP.md`
 
 ### 依赖更新
 新增依赖已写入 `requirements.txt`：
