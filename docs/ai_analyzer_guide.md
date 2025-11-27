@@ -1,28 +1,39 @@
-# AI 项目内容分析器使用指南
+wo# AI 项目内容分析器使用指南
 
 ## 概述
 
-AI 项目内容分析器是 BidInsight v0.2 新增的智能分析功能，基于 **LangChain + OpenAI GPT** 实现。它可以自动从招标公告详情页中提取：
+AI 项目内容分析器是 BidInsight v0.2 新增的智能分析功能，基于 **LangChain + Kimi（月之暗面）** 实现。它可以自动从招标公告详情页中提取：
 
 - 📝 项目建设内容概述（50-200字精简描述）
 - 💰 项目预算金额（自动归一化为万元）
 - 📦 分包信息（如有多个标包，自动识别并分别提取）
 - 🔢 每个分包的具体内容和金额
 
+**为什么选择 Kimi？**
+- 🇨🇳 国内访问无需翻墙，速度快稳定
+- 💰 价格优惠（约 ¥12/百万tokens）
+- 🎯 中文理解和生成质量优秀
+- 🧠 支持 `kimi-k2-thinking` 推理模型（思维链）
+
 ## 快速开始
 
 ### 1. 环境配置
 
-首先需要配置 OpenAI API：
+**获取 Kimi API Key：**
+
+访问 Kimi 开放平台：https://platform.moonshot.cn/console/api-keys
+
+**配置方式：**
 
 ```bash
 # 方式一：使用环境变量（推荐）
-export OPENAI_API_KEY="sk-your-api-key"
-export OPENAI_BASE_URL="https://api.openai.com/v1"  # 可选，默认使用官方 API
+export MOONSHOT_API_KEY="sk-your-kimi-api-key"
+# 注：也可以使用 OPENAI_API_KEY，代码会自动识别
 
 # 方式二：使用 .env 文件
 cp env.example .env
-# 编辑 .env 文件，填入你的 API Key
+# 编辑 .env 文件，填入：
+# MOONSHOT_API_KEY=sk-your-kimi-api-key
 ```
 
 ### 2. 基本使用
@@ -65,10 +76,29 @@ python analyze_projects.py [CSV文件] [选项]
   CSV文件              输入的 CSV 文件路径（由 csg_bidding.py 生成）
 
 可选参数：
-  -o, --output PATH   输出 CSV 文件路径（默认自动生成时间戳文件名）
-  -n, --max-count N   最多分析多少条记录（用于测试）
-  --api-key KEY       OpenAI API Key（也可通过环境变量设置）
-  --base-url URL      OpenAI API Base URL（也可通过环境变量设置）
+  -o, --output PATH    输出 CSV 文件路径（默认自动生成时间戳文件名）
+  -n, --max-count N    最多分析多少条记录（用于测试）
+  --model MODEL        指定使用的模型（默认: moonshot-v1-8k）
+                       可选: moonshot-v1-8k, moonshot-v1-32k, 
+                            moonshot-v1-128k, kimi-k2-thinking
+  --api-key KEY        API Key（也可通过环境变量 MOONSHOT_API_KEY 设置）
+  --base-url URL       API Base URL（默认: https://api.moonshot.cn/v1）
+```
+
+### 4. 模型选择
+
+| 模型 | 上下文 | 适用场景 | 价格 | 特点 |
+|------|--------|---------|------|------|
+| **moonshot-v1-8k** | 8K | 常规项目分析 | ¥12/百万tokens | 默认，性价比最高 |
+| **moonshot-v1-32k** | 32K | 长文本项目 | ¥24/百万tokens | 适合复杂项目 |
+| **moonshot-v1-128k** | 128K | 超长文档 | ¥60/百万tokens | 极长内容 |
+| **kimi-k2-thinking** | - | 复杂推理分析 | ¥30/百万tokens | 支持思维链（reasoning） |
+
+**使用推理模型示例：**
+
+```bash
+# 使用 kimi-k2-thinking 进行深度分析
+python analyze_projects.py data_csv/20251126_215926.csv --model kimi-k2-thinking -n 5
 ```
 
 ## 输出格式

@@ -50,7 +50,8 @@ def analyze_projects(
     csv_path: str,
     output_path: Optional[str] = None,
     max_count: Optional[int] = None,
-    skip_existing: bool = True
+    skip_existing: bool = True,
+    model: str = "moonshot-v1-8k"
 ) -> List[Dict[str, Any]]:
     """
     分析项目
@@ -60,6 +61,7 @@ def analyze_projects(
         output_path: 输出文件路径,如果为None则自动生成
         max_count: 最多分析多少条记录
         skip_existing: 是否跳过已经分析过的记录
+        model: 使用的模型名称
         
     Returns:
         分析结果列表
@@ -75,12 +77,13 @@ def analyze_projects(
         console.print(f"[yellow]仅分析前 {max_count} 条记录[/yellow]")
     
     # 初始化分析器
-    console.print("[cyan]正在初始化AI分析器...[/cyan]")
+    console.print(f"[cyan]正在初始化AI分析器 (模型: {model})...[/cyan]")
     try:
-        analyzer = ProjectAnalyzer()
+        analyzer = ProjectAnalyzer(model=model)
     except ValueError as e:
         console.print(f"[red]错误: {e}[/red]")
-        console.print("[yellow]请设置环境变量 OPENAI_API_KEY 和 OPENAI_BASE_URL[/yellow]")
+        console.print("[yellow]请设置环境变量 MOONSHOT_API_KEY 或 OPENAI_API_KEY[/yellow]")
+        console.print("[yellow]获取 Kimi API Key: https://platform.moonshot.cn/console/api-keys[/yellow]")
         sys.exit(1)
     
     # 准备输出文件
@@ -186,19 +189,25 @@ def main():
         help="最多分析多少条记录(用于测试)"
     )
     parser.add_argument(
+        "--model",
+        default="moonshot-v1-8k",
+        help="使用的模型名称 (默认: moonshot-v1-8k, 可选: moonshot-v1-32k, moonshot-v1-128k, kimi-k2-thinking)"
+    )
+    parser.add_argument(
         "--api-key",
-        help="OpenAI API Key (也可通过环境变量 OPENAI_API_KEY 设置)"
+        help="API Key (也可通过环境变量 MOONSHOT_API_KEY 或 OPENAI_API_KEY 设置)"
     )
     parser.add_argument(
         "--base-url",
-        help="OpenAI API Base URL (也可通过环境变量 OPENAI_BASE_URL 设置)"
+        help="API Base URL (默认: https://api.moonshot.cn/v1, 也可通过环境变量 OPENAI_BASE_URL 设置)"
     )
     
     args = parser.parse_args()
     
     # 设置环境变量(如果通过参数提供)
     if args.api_key:
-        os.environ["OPENAI_API_KEY"] = args.api_key
+        os.environ["MOONSHOT_API_KEY"] = args.api_key
+        os.environ["OPENAI_API_KEY"] = args.api_key  # 向后兼容
     if args.base_url:
         os.environ["OPENAI_BASE_URL"] = args.base_url
     
@@ -211,7 +220,8 @@ def main():
     analyze_projects(
         csv_path=args.csv_file,
         output_path=args.output,
-        max_count=args.max_count
+        max_count=args.max_count,
+        model=args.model
     )
 
 

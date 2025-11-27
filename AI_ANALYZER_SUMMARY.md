@@ -18,8 +18,7 @@
 source .venv/bin/activate
 
 # 设置 Kimi API Key（推荐）
-export OPENAI_API_KEY="sk-your-kimi-key"
-export OPENAI_BASE_URL="https://api.moonshot.cn/v1"
+export MOONSHOT_API_KEY="sk-your-kimi-key"
 
 # 获取 API Key: https://platform.moonshot.cn/console/api-keys
 ```
@@ -35,11 +34,14 @@ python crawlers/sites/csg_bidding.py \
 ### 3. AI 分析
 
 ```bash
-# 测试前 5 条
+# 测试前 5 条（默认模型）
 python analyze_projects.py data_csv/20251126_215926.csv -n 5
 
 # 批量分析全部
 python analyze_projects.py data_csv/20251126_215926.csv
+
+# 使用推理模型（适合复杂项目）
+python analyze_projects.py data_csv/20251126_215926.csv --model kimi-k2-thinking
 ```
 
 ### 4. 查看结果
@@ -146,8 +148,7 @@ python analyze_projects.py data_2.csv -o result_2.csv
 
 **解决**: 
 ```bash
-export OPENAI_API_KEY="sk-your-kimi-key"
-export OPENAI_BASE_URL="https://api.moonshot.cn/v1"
+export MOONSHOT_API_KEY="sk-your-kimi-key"
 ```
 获取 API Key: https://platform.moonshot.cn/console/api-keys
 

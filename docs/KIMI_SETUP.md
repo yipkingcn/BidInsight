@@ -62,32 +62,65 @@ python test_analyzer.py
 
 ## 🎛️ 模型选择
 
-Kimi 提供三种模型，根据需求选择：
+Kimi 提供多种模型，根据需求选择：
+
+### 标准模型（适合数据提取）
 
 | 模型 | 上下文长度 | 适用场景 | 价格 |
 |------|-----------|---------|------|
-| `moonshot-v1-8k` | 8,192 tokens | 常规项目分析（默认） | ¥12/百万tokens |
+| `moonshot-v1-8k` ⭐ | 8,192 tokens | 常规项目分析（默认） | ¥12/百万tokens |
 | `moonshot-v1-32k` | 32,768 tokens | 长文本项目 | ¥24/百万tokens |
 | `moonshot-v1-128k` | 128,000 tokens | 超长文档分析 | ¥60/百万tokens |
 
+### 推理模型（支持思维链）🧠
+
+| 模型 | 特点 | 适用场景 | 价格 |
+|------|-----|---------|------|
+| `kimi-k2-thinking` | 支持 reasoning | 复杂逻辑分析、多步骤推理 | ¥30/百万tokens |
+
+**`kimi-k2-thinking` 的优势：**
+- 💡 **思维链（Chain of Thought）**: 输出推理过程，可以看到 AI 的"思考"步骤
+- 🎯 **更准确**: 对于复杂的金额提取和内容理解更精准
+- 📊 **适合分包分析**: 在识别多个分包时表现更好
+
 **默认使用 `moonshot-v1-8k`，性价比最高。**
 
-### 修改模型（可选）
+### 修改模型
 
-如需使用其他模型，编辑 `analyzers/project_analyzer.py`：
+**方式 1：命令行参数（推荐）**
+
+```bash
+# 使用标准模型
+python analyze_projects.py data.csv --model moonshot-v1-8k
+
+# 使用推理模型（适合复杂项目）
+python analyze_projects.py data.csv --model kimi-k2-thinking
+
+# 使用长文本模型
+python analyze_projects.py data.csv --model moonshot-v1-32k
+```
+
+**方式 2：代码中指定**
+
+编辑 `analyzers/project_analyzer.py` 或在代码中：
 
 ```python
+# 使用推理模型
 analyzer = ProjectAnalyzer(
-    model="moonshot-v1-32k",  # 改为 32k 模型
+    model="kimi-k2-thinking",
     temperature=0.0
 )
 ```
 
-或在调用时指定：
+### 模型选择建议
 
-```python
-python analyze_projects.py data.csv --model moonshot-v1-32k
-```
+| 项目类型 | 推荐模型 | 理由 |
+|---------|---------|------|
+| 简单采购（单一标的） | moonshot-v1-8k | 成本低，速度快 |
+| 中等复杂度 | moonshot-v1-8k | 性价比最优 |
+| 多分包项目 | kimi-k2-thinking | 推理能力强，分包识别准确 |
+| 超长文档（>5000字） | moonshot-v1-32k | 上下文更长 |
+| 复杂金额提取 | kimi-k2-thinking | 逻辑推理更准确 |
 
 ## 💰 成本估算
 

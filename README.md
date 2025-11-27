@@ -203,28 +203,30 @@ python crawlers/sites/sgcc_supply.py \
 # 1. 获取 API Key
 # 访问 https://platform.moonshot.cn/console/api-keys
 
-# 2. 复制配置模板
-cp env.example .env
+# 2. 配置环境变量
+export MOONSHOT_API_KEY="sk-your-kimi-key"
 
-# 3. 编辑 .env 文件，填入你的 API Key
-# OPENAI_API_KEY=sk-your-kimi-key
-# OPENAI_BASE_URL=https://api.moonshot.cn/v1
+# 或使用 .env 文件
+cp env.example .env
+# 编辑 .env，填入: MOONSHOT_API_KEY=sk-your-kimi-key
 ```
 
-> 💡 **为什么选择 Kimi？** 国内访问稳定快速，价格优惠，中文理解优秀。详见 [Kimi 配置指南](docs/KIMI_SETUP.md)
+> 💡 **为什么选择 Kimi？** 国内访问稳定快速，价格优惠（¥12/百万tokens），中文理解优秀，支持思维链推理模型。详见 [Kimi 配置指南](docs/KIMI_SETUP.md)
 
 **场景 D：批量分析项目内容**
 对已采集的 CSV 文件进行 AI 分析，提取建设内容和金额：
 ```bash
 # 设置环境变量（或在 .env 中配置）
-export OPENAI_API_KEY="sk-your-kimi-key"
-export OPENAI_BASE_URL="https://api.moonshot.cn/v1"
+export MOONSHOT_API_KEY="sk-your-kimi-key"
 
-# 分析所有项目
+# 分析所有项目（默认使用 moonshot-v1-8k）
 python analyze_projects.py data_csv/20251126_215926.csv
 
 # 仅分析前 5 条（测试用）
 python analyze_projects.py data_csv/20251126_215926.csv -n 5
+
+# 使用推理模型（适合复杂项目）
+python analyze_projects.py data_csv/20251126_215926.csv --model kimi-k2-thinking
 
 # 指定输出路径
 python analyze_projects.py data_csv/20251126_215926.csv -o results/analyzed.csv

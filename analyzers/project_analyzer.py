@@ -55,23 +55,33 @@ class ProjectAnalyzer:
         初始化分析器
         
         Args:
-            api_key: API Key, 如果不提供则从环境变量 OPENAI_API_KEY 读取
-            base_url: API Base URL, 如果不提供则从环境变量 OPENAI_BASE_URL 读取
-                     - Kimi: https://api.moonshot.cn/v1
+            api_key: API Key, 优先级: 参数 > MOONSHOT_API_KEY > OPENAI_API_KEY
+            base_url: API Base URL, 如果不提供则从环境变量读取或使用默认值
+                     - Kimi: https://api.moonshot.cn/v1 (默认)
                      - OpenAI: https://api.openai.com/v1
             model: 使用的模型名称
-                   - Kimi: moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k (默认)
+                   - Kimi 标准: moonshot-v1-8k (默认), moonshot-v1-32k, moonshot-v1-128k
+                   - Kimi 推理: kimi-k2-thinking (支持思维链)
                    - OpenAI: gpt-4o-mini, gpt-4o, gpt-4-turbo
             temperature: 温度参数, 默认 0.0 (更确定性的输出)
         """
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
-        self.base_url = base_url or os.getenv("OPENAI_BASE_URL", "https://api.moonshot.cn/v1")
+        # 支持多种环境变量名称
+        self.api_key = (
+            api_key 
+            or os.getenv("MOONSHOT_API_KEY")  # Kimi 官方推荐
+            or os.getenv("OPENAI_API_KEY")    # 兼容 OpenAI 格式
+        )
+        self.base_url = (
+            base_url 
+            or os.getenv("OPENAI_BASE_URL")
+            or "https://api.moonshot.cn/v1"  # 默认使用 Kimi
+        )
         self.model = model
         self.temperature = temperature
         
         if not self.api_key:
             raise ValueError(
-                "必须提供 api_key 参数或设置环境变量 OPENAI_API_KEY"
+                "必须提供 api_key 参数或设置环境变量 MOONSHOT_API_KEY / OPENAI_API_KEY"
             )
         
         # 初始化 LLM

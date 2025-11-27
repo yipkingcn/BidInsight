@@ -165,6 +165,7 @@ source .venv/bin/activate
 ### 技术要点
 - **金额归一化**: 自动识别并转换"元"、"千元"、"万元"、"亿元"为统一的万元单位
 - **智能提取**: 默认使用 Kimi moonshot-v1-8k，采用 temperature=0.0 确保输出稳定
+- **推理模型**: 支持 kimi-k2-thinking，提供思维链推理能力，适合复杂项目
 - **分包识别**: 可识别"第一包"、"标包1"、"包1"等多种分包表述
 - **容错处理**: 对无法提取或分析失败的项目标注错误信息，不中断整体流程
 
@@ -173,19 +174,28 @@ source .venv/bin/activate
 **默认使用 Kimi（月之暗面）大模型**
 
 1. 获取 API Key：访问 https://platform.moonshot.cn/console/api-keys
-2. 复制 `env.example` 为 `.env` 并填写：
+2. 配置环境变量：
 
 ```bash
+# 方式 1: 导出环境变量（推荐）
+export MOONSHOT_API_KEY="sk-your-kimi-key"
+
+# 方式 2: 使用 .env 文件
 cp env.example .env
 # 编辑 .env 文件，填入：
-# OPENAI_API_KEY=sk-your-kimi-key
-# OPENAI_BASE_URL=https://api.moonshot.cn/v1
+# MOONSHOT_API_KEY=sk-your-kimi-key
 ```
+
+**模型选择**：
+- `moonshot-v1-8k` (默认): 性价比最高，¥12/百万tokens
+- `moonshot-v1-32k`: 长文本，¥24/百万tokens
+- `kimi-k2-thinking`: 推理模型，支持思维链，¥30/百万tokens
 
 **优势**：
 - 🇨🇳 国内访问无需翻墙，速度快
-- 💰 价格优惠（约 ¥12/百万tokens）
+- 💰 价格优惠
 - 🎯 中文理解优秀
+- 🧠 支持推理模型（思维链）
 
 详细配置见：`docs/KIMI_SETUP.md`
 
