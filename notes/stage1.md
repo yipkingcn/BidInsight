@@ -112,3 +112,75 @@ source .venv/bin/activate
   ```
 - 输出记录会新增 `source_keyword` 字段，标识来源单位，方便后续筛选和汇总。
 
+## 2025-11-27 工作记录 — AI 智能分析功能
+
+### 功能概述
+新增基于 **LangChain + OpenAI GPT** 的项目内容智能分析功能，可自动从招标公告详情页提取：
+- 项目建设内容概述
+- 项目预算金额（自动归一化为万元）
+- 分包信息（如有多个标包）
+- 每个分包的具体内容和金额
+
+### 核心模块
+
+1. **分析器模块 (`analyzers/project_analyzer.py`)**
+   - `ProjectAnalyzer`: 核心分析器类，封装了 LangChain 调用逻辑
+   - `ProjectAnalysis`: 结构化的分析结果模型
+   - `PackageInfo`: 分包信息模型
+   - 支持从 HTML 中自动提取"2. 项目概况和招标/采购范围"部分
+   - 智能识别各种金额表述（"元"、"万元"、"千元"、"亿元"）并统一转换为万元
+
+2. **独立分析工具 (`analyze_projects.py`)**
+   - 可读取 `csg_bidding.py` 生成的 CSV 文件
+   - 批量分析每个项目的详情页
+   - 输出增强版 CSV，包含 AI 提取的建设内容和金额信息
+   - 使用示例：
+     ```bash
+     # 设置环境变量
+     export OPENAI_API_KEY="your-api-key"
+     export OPENAI_BASE_URL="https://api.openai.com/v1"  # 可选
+     
+     # 分析已采集的项目
+     python analyze_projects.py data_csv/20251126_215926.csv
+     
+     # 仅分析前5条（测试用）
+     python analyze_projects.py data_csv/20251126_215926.csv -n 5
+     
+     # 指定输出路径
+     python analyze_projects.py data_csv/20251126_215926.csv -o results/analyzed.csv
+     ```
+
+3. **测试脚本 (`test_analyzer.py`)**
+   - 快速验证分析器功能的简单脚本
+   - 使用内置示例文本测试提取效果
+
+### 输出格式
+增强后的 CSV 包含以下新增列：
+- **整体建设内容**: AI 提取的项目概述（50-200字）
+- **整体金额（万元）**: 项目总预算（自动归一化）
+- **是否有分包**: "是"或"否"
+- **分包数量**: 分包个数
+- **分包详情**: JSON 格式的分包列表（包名、内容、金额）
+
+### 技术要点
+- **金额归一化**: 自动识别并转换"元"、"千元"、"万元"、"亿元"为统一的万元单位
+- **智能提取**: 使用 GPT-4o-mini，采用 temperature=0.0 确保输出稳定
+- **分包识别**: 可识别"第一包"、"标包1"、"包1"等多种分包表述
+- **容错处理**: 对无法提取或分析失败的项目标注错误信息，不中断整体流程
+
+### 配置说明
+复制 `env.example` 为 `.env` 并填写你的 OpenAI API Key：
+```bash
+cp env.example .env
+# 编辑 .env 文件，填入你的 OPENAI_API_KEY
+```
+
+### 依赖更新
+新增依赖已写入 `requirements.txt`：
+- `langchain`
+- `langchain-openai`
+- `langchain-community`
+- `openai`
+- `tiktoken`
+- 及相关传递依赖
+

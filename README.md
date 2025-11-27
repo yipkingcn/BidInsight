@@ -196,21 +196,54 @@ python crawlers/sites/sgcc_supply.py \
   --output exports/sgcc_sample.jsonl
 ```
 
-4) 前端与后端（开发中）
+4) AI 智能分析（新功能）✨
+
+**前置条件：配置 OpenAI API**
+```bash
+# 复制配置模板
+cp env.example .env
+
+# 编辑 .env 文件，填入你的 API Key
+# OPENAI_API_KEY=sk-xxx
+# OPENAI_BASE_URL=https://api.openai.com/v1  # 可选
+```
+
+**场景 D：批量分析项目内容**
+对已采集的 CSV 文件进行 AI 分析，提取建设内容和金额：
+```bash
+# 设置环境变量（或在 .env 中配置）
+export OPENAI_API_KEY="your-api-key"
+
+# 分析所有项目
+python analyze_projects.py data_csv/20251126_215926.csv
+
+# 仅分析前 5 条（测试用）
+python analyze_projects.py data_csv/20251126_215926.csv -n 5
+
+# 指定输出路径
+python analyze_projects.py data_csv/20251126_215926.csv -o results/analyzed.csv
+```
+
+**场景 E：快速测试分析器**
+```bash
+python test_analyzer.py
+```
+
+5) 前端与后端（开发中）
 *详见 `apps/` 目录下的说明*
 
 ---
 
-## 当前功能 (v0.1)
+## 当前功能 (v0.2)
 
 ### 1. 南方电网供应链爬虫 (`csg_bidding.py`)
 - **数据源**: [bidding.csg.cn](https://www.bidding.csg.cn)
 - **核心特性**:
   - **批量采集**: 支持从文件读取多个关键词循环采集。
-  - **智能解析**: 自动识别“招标公告”与“非招标公告”，提取项目编号、招标人、预算、关键时间节点。
-  - **数据清洗**: 自动去除“中标公示”等冗余数据，统一日期格式为 `YYYY-MM-DD`。
+  - **智能解析**: 自动识别"招标公告"与"非招标公告"，提取项目编号、招标人、预算、关键时间节点。
+  - **数据清洗**: 自动去除"中标公示"等冗余数据，统一日期格式为 `YYYY-MM-DD`。
   - **抗干扰**: 内置指数退避重试机制与随机延迟，模拟真实浏览器行为。
-  - **CSV 导出**: 自动生成业务所需的 8 列标准报表（招标人、项目名称、项目编号、采购方式等）。
+  - **CSV 导出**: 自动生成业务所需的 9 列标准报表（招标人、项目单位、项目名称、项目编号、采购方式等）。
 
 ### 2. 国网电子商务平台爬虫 (`sgcc_supply.py`)
 - **数据源**: [ecsg.com.cn](https://ecsg.com.cn)
@@ -219,12 +252,25 @@ python crawlers/sites/sgcc_supply.py \
   - 支持详情页正文与附件元数据提取。
   - 标准化 JSONL 输出。
 
+### 3. AI 项目内容分析器 (`analyze_projects.py`) ✨ 新增
+- **核心能力**: 使用 LangChain + OpenAI GPT 对招标项目进行智能分析
+- **核心特性**:
+  - **智能提取**: 自动从"2. 项目概况和招标/采购范围"中提取建设内容概述。
+  - **金额归一化**: 智能识别并转换"元"、"千元"、"万元"、"亿元"为统一的万元单位。
+  - **分包识别**: 自动识别并提取多个标包的详细信息（包名、内容、金额）。
+  - **批量处理**: 可批量分析已采集的 CSV 文件中的所有项目。
+  - **增强输出**: 在原 CSV 基础上新增"整体建设内容"、"整体金额（万元）"、"是否有分包"、"分包数量"、"分包详情"等列。
+- **使用场景**: 快速了解项目核心内容和预算规模，辅助商机判断和投标决策。
+
 ---
 
 ## 目录结构
 
 ```
 bidinsight/
+├─ analyzers/             # AI 分析模块 ✨ 新增
+│  ├─ __init__.py
+│  └─ project_analyzer.py # [核心] LangChain 项目内容分析器
 ├─ apps/                  # (预留) 前后端应用
 ├─ configs/               # 配置文件
 │  └─ keywords/           # 关键词列表
@@ -238,6 +284,9 @@ bidinsight/
 ├─ docs/                  # 文档
 ├─ notes/                 # 开发日志
 │  └─ stage1.md           # 阶段 1 详细操作指南
+├─ analyze_projects.py    # [工具] AI 批量分析脚本 ✨ 新增
+├─ test_analyzer.py       # [工具] 分析器测试脚本 ✨ 新增
+├─ env.example            # 环境变量配置模板 ✨ 新增
 ├─ .gitignore
 ├─ requirements.txt
 └─ README.md
